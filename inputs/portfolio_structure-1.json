@@ -1,0 +1,14 @@
+{
+  "name": "Main Portfolio",
+  "owner": "sdonadio",
+  "positions": [
+    {"symbol": "AAPL", "quantity": 100, "price": 172.35},
+    {"symbol": "MSFT", "quantity": 50, "price": 328.10}
+  ],
+  "sub_portfolios": [
+    {
+      "name": "Index Holdings",
+      "positions": [{"symbol": "SPY", "quantity": 20, "price": 430.50}]
+    }
+  ]
+}
