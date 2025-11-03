@@ -101,3 +101,37 @@ def test_pandas_vs_polars_single_symbol_equivalence():
     pol_sel = pol_pd.loc[:, sorted(common)].sort_index()
 
     np.testing.assert_allclose(panda_sel.fillna(0).values, pol_sel.fillna(0).values, rtol=1e-6, atol=1e-9)
+
+
+def test_portfolio_aggregation_totals():
+    # Build a tiny market data set and portfolio
+    ts = pd.to_datetime(["2025-01-01T10:00:00", "2025-01-01T10:01:00"]) 
+    rows = [
+        {"timestamp": ts[0], "symbol": "AAA", "price": 10.0},
+        {"timestamp": ts[1], "symbol": "AAA", "price": 12.0},
+        {"timestamp": ts[0], "symbol": "BBB", "price": 5.0},
+        {"timestamp": ts[1], "symbol": "BBB", "price": 6.0},
+    ]
+    market_df = pd.DataFrame(rows)
+
+    portfolio = {
+        "name": "test",
+        "positions": [
+            {"symbol": "AAA", "quantity": 2},
+            {"symbol": "BBB", "quantity": 3},
+        ]
+    }
+
+    # Sequential aggregation
+    seq = __import__('portfolio').aggregate_portfolio_metrics(portfolio.copy(), market_df)
+
+    # Expected total_value = latest_price * qty summed
+    latest_prices = {sym: market_df[market_df['symbol'] == sym].sort_values('timestamp')['price'].iloc[-1]
+                     for sym in ['AAA', 'BBB']}
+    expected_total = latest_prices['AAA'] * 2 + latest_prices['BBB'] * 3
+
+    assert pytest.approx(expected_total, rel=1e-9) == seq['metrics']['total_value']
+
+    # Parallel aggregation should match sequential for these inputs
+    par = __import__('portfolio').aggregate_portfolio_metrics_parallel(portfolio.copy(), market_df, market_data_path='')
+    assert pytest.approx(seq['metrics']['total_value'], rel=1e-9) == par['metrics']['total_value']
