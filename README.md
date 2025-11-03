@@ -35,8 +35,3 @@ pytest -q
 
 Notes
 - `psutil` is optional but recommended for CPU/memory sampling in experiments.
-- Multiprocessing works reliably when running the standalone script (the notebook version shows the same logic but the script avoids interactive pickling issues).
-
-If you want additions (CI, more tests, or plots), tell me which and I can add them.
-# FINM32500-A7
-Parallel Computing for Financial Data Processing
